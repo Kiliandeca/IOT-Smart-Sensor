@@ -2,6 +2,8 @@ package fr.cpe.smartsensor;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -16,10 +18,13 @@ import java.net.UnknownHostException;
 
 
 public class MainActivity extends AppCompatActivity {
-    Button connectBtn;
+    private static final String TAG = "MyActivity";
+    public static final String MSG = "new activity !";
+
+    Button connectBtn, monitorBtn;
     InetAddress ip;
     int port;
-    private static final String TAG = "MyActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,6 +32,9 @@ public class MainActivity extends AppCompatActivity {
 
         connectBtn = findViewById(R.id.connect);
         connectBtn.setOnClickListener(onConnect());
+
+        monitorBtn = findViewById(R.id.monitor);
+        monitorBtn.setOnClickListener(displayMonitor(this));
     }
 
     private View.OnClickListener onConnect(){
@@ -48,6 +56,17 @@ public class MainActivity extends AppCompatActivity {
         };
     }
 
+    private View.OnClickListener displayMonitor(final Activity activity){
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(activity, DisplayMonitorActivity.class);
+                intent.putExtra(MSG, "Dashboard");
+                startActivity(intent);
+            }
+        };
+    }
+
     public void sendPacket(final String message) {
         (new Thread() { public void run() {
             try {
@@ -62,5 +81,4 @@ public class MainActivity extends AppCompatActivity {
             }
         }}).start();
     }
-
 }
