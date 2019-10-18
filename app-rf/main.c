@@ -163,23 +163,34 @@ void handle_rf_rx_data(void)
 	/* Go back to RX mode */
 	cc1101_enter_rx_mode();
 	message msg_data;
-	memcpy(&msg_data,&data[2],sizeof(message));
-	
-	if(data[1] == DEVICE_ADDRESS){
-		
 
-		uprint(UART0, "==============================");
-		uprint(UART0, msg_data.lum,
+	uprintf(UART0, "============================== %d \n\r", data[2]);
+
+	memcpy(&msg_data,&data[2],sizeof(message));
+
+	int crc = data[0] + data[1] + data[2] + msg_data.lum + msg_data.temp + msg_data.hum;
+	
+	// MODIFICATION
+	if(crc == data[3]){
+		uprintf(UART0, "============================== \n\r");
+		uprintf(UART0, "Données non intègres \n\r");
+		uprintf(UART0, "============================== \n\r");
+
+	}
+	else if(data[2] == DEVICE_ADDRESS){
+		
+		uprintf(UART0, "============================== \n\r");
+		uprintf(UART0, "{ \"Lux\": %d, \"Temp\": %d.%02d, \"Humidity\": %d.%d}\n\r",  
+					msg_data.lum,
 					msg_data.temp / 10,  (msg_data.temp > 0) ? (msg_data.temp % 10) : ((-msg_data.temp) % 10),
 					msg_data.hum / 10, msg_data.hum % 10);
-		uprint(UART0, "==============================");
-
+		uprintf(UART0, "============================== \n\r");
 	}
 
 #ifdef DEBUG
-	uprintf(UART0, "RF: ret:%d, st: %d.\n\r", ret, status);
+	/*uprintf(UART0, "RF: ret:%d, st: %d.\n\r", ret, status);
     uprintf(UART0, "RF: data lenght: %d.\n\r", data[0]);
-    uprintf(UART0, "RF: destination: %x.\n\r", data[1]);
+    uprintf(UART0, "RF: destination: %x.\n\r", data[1]);*/
 	/* JSON PRINT
 	uprintf(UART0, "{ \"Lux\": %d, \"Temp\": %d.%02d, \"Humidity\": %d.%d}\n\r",  
 					msg_data.lum,
@@ -346,11 +357,14 @@ void send_on_rf(void)
 {
 	message data;
 	uint8_t cc_tx_data[sizeof(message)+2];
-	cc_tx_data[0]=sizeof(message)+1;
-	cc_tx_data[1]=NEIGHBOR_ADDRESS;
+	cc_tx_data[0]=sizeof(message)+1;  	//length
+	cc_tx_data[1]=DEVICE_ADDRESS;		//source
+	cc_tx_data[2]=NEIGHBOR_ADDRESS;		//dest
+	cc_tx_data[3] = cc_tx_data[0] + cc_tx_data[1] + cc_tx_data[2] + cc_tx_msg.hum + cc_tx_msg.lum + cc_tx_msg.temp;				//CRC
 	data.hum=cc_tx_msg.hum;
 	data.lum=cc_tx_msg.lum;
 	data.temp=cc_tx_msg.temp;
+
 	//data.id = 66;
 	memcpy(&cc_tx_data[2], &data, sizeof(message));
 
