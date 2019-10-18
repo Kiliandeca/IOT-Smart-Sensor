@@ -159,14 +159,21 @@ void handle_rf_rx_data(void)
 
 	/* Check for received packet (and get it if any) */
 	ret = cc1101_receive_packet(data, RF_BUFF_LEN, &status);
-	uprintf(UART0, "<====== MESSAGE ======>  id : %x", data[1]);
+	
 	/* Go back to RX mode */
 	cc1101_enter_rx_mode();
 	message msg_data;
 	memcpy(&msg_data,&data[2],sizeof(message));
 	
 	if(data[1] == DEVICE_ADDRESS){
-		uprintf(UART0, "<====== MESSAGE ======>  bon id");
+		
+
+		uprint(UART0, "==============================");
+		uprint(UART0, msg_data.lum,
+					msg_data.temp / 10,  (msg_data.temp > 0) ? (msg_data.temp % 10) : ((-msg_data.temp) % 10),
+					msg_data.hum / 10, msg_data.hum % 10);
+		uprint(UART0, "==============================");
+
 	}
 
 #ifdef DEBUG
