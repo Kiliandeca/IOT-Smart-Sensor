@@ -21,6 +21,7 @@
  *
  *************************************************************************** */
 
+
 #include "core/system.h"
 #include "core/systick.h"
 #include "core/pio.h"
@@ -50,8 +51,8 @@
 #define RF_BUFF_LEN  64
 
 #define SELECTED_FREQ  FREQ_SEL_48MHz
-#define DEVICE_ADDRESS  0x67 /* Addresses 0x00 and 0xFF are broadcast */
-#define NEIGHBOR_ADDRESS 0x66 /* Address of the associated device */
+#define DEVICE_ADDRESS  67 /* Addresses 0x00 and 0xFF are broadcast */
+#define NEIGHBOR_ADDRESS 66 /* Address of the associated device */
 /***************************************************************************** */
 /* Pins configuration */
 /* pins blocks are passed to set_pins() for pins configuration.
@@ -90,6 +91,10 @@ struct message
 	uint32_t lum;
 };
 typedef struct message message;
+
+
+
+
 
 
 /***************************************************************************** */
@@ -159,44 +164,33 @@ void handle_rf_rx_data(void)
 
 	/* Check for received packet (and get it if any) */
 	ret = cc1101_receive_packet(data, RF_BUFF_LEN, &status);
-	
 	/* Go back to RX mode */
 	cc1101_enter_rx_mode();
 	message msg_data;
-
-	uprintf(UART0, "============================== %d \n\r", data[2]);
-
-	memcpy(&msg_data,&data[2],sizeof(message));
-
-	int crc = data[0] + data[1] + data[2] + msg_data.lum + msg_data.temp + msg_data.hum;
 	
-	// MODIFICATION
-	if(crc == data[3]){
-		uprintf(UART0, "============================== \n\r");
-		uprintf(UART0, "Données non intègres \n\r");
-		uprintf(UART0, "============================== \n\r");
 
-	}
-	else if(data[2] == DEVICE_ADDRESS){
-		
-		uprintf(UART0, "============================== \n\r");
-		uprintf(UART0, "{ \"Lux\": %d, \"Temp\": %d.%02d, \"Humidity\": %d.%d}\n\r",  
-					msg_data.lum,
-					msg_data.temp / 10,  (msg_data.temp > 0) ? (msg_data.temp % 10) : ((-msg_data.temp) % 10),
-					msg_data.hum / 10, msg_data.hum % 10);
-		uprintf(UART0, "============================== \n\r");
+	int crcReceived = data[0] + data[1] + data[2];
+
+	if(data[1] == DEVICE_ADDRESS && data[2] == NEIGHBOR_ADDRESS && data[3] == crcReceived ){
+		memcpy(&msg_data,&data[4],sizeof(message));
+		uprintf(UART0, "######## MSG RECEIVED ######## \n\r");
+		uprintf(UART0, "\t Tx ret: %d\n\r", ret);
+		uprintf(UART0, "\t RF: data lenght: %d.\n\r", data[0]);
+		uprintf(UART0, "\t RF: destination : %d.\n\r", data[1]);
+		uprintf(UART0, "\t RF: source : %d.\n\r", data[2]);
+		uprintf(UART0, "\t RF: CRC RECU : %d.\n\r", data[3]);
+		uprintf(UART0, "######## END RECEIVED MSG ######## \n\r");
 	}
 
 #ifdef DEBUG
-	/*uprintf(UART0, "RF: ret:%d, st: %d.\n\r", ret, status);
-    uprintf(UART0, "RF: data lenght: %d.\n\r", data[0]);
-    uprintf(UART0, "RF: destination: %x.\n\r", data[1]);*/
-	/* JSON PRINT
+	
+	
+	/* JSON PRINT*/
 	uprintf(UART0, "{ \"Lux\": %d, \"Temp\": %d.%02d, \"Humidity\": %d.%d}\n\r",  
 					msg_data.lum,
 					msg_data.temp / 10,  (msg_data.temp > 0) ? (msg_data.temp % 10) : ((-msg_data.temp) % 10),
 					msg_data.hum / 10, msg_data.hum % 10);
-    uprintf(UART0, "RF: message: %c.\n\r", data[2]);*/
+    /*uprintf(UART0, "RF: message: %c.\n\r", data[2]);*/
 #endif
 
 }
@@ -239,7 +233,7 @@ void lux_config(int uart_num)
 	int ret = 0;
 	ret = tsl256x_configure(&tsl256x_sensor);
 	if (ret != 0) {
-		/*uprintf(uart_num, "Lux config error: %d\n\r", ret);*/
+		uprintf(uart_num, "Lux config error: %d\n\r", ret);
 	}
 }
 
@@ -250,9 +244,9 @@ void lux_display(int uart_num, uint16_t* ir, uint32_t* lux)
 
 	ret = tsl256x_sensor_read(&tsl256x_sensor, &comb, ir, lux);
 	if (ret != 0) {
-		/*uprintf(uart_num, "Lux read error: %d\n\r", ret);*/
+		// uprintf(uart_num, "Lux read error: %d\n\r", ret);
 	} else {
-		//uprintf(uart_num, "Lux: %d  (Comb: 0x%04x, IR: 0x%04x)\n\r", *lux, comb, *ir);
+		// uprintf(uart_num, "Lux: %d  (Comb: 0x%04x, IR: 0x%04x)\n\r", *lux, comb, *ir);
 	}
 }
 
@@ -278,7 +272,7 @@ void bme_config(int uart_num)
 
 	ret = bme280_configure(&bme280_sensor);
 	if (ret != 0) {
-		/*uprintf(uart_num, "Sensor config error: %d\n\r", ret);*/
+		// uprintf(uart_num, "Sensor config error: %d\n\r", ret);
 	}
 }
 
@@ -290,7 +284,7 @@ void bme_display(int uart_num, uint32_t* pressure, uint32_t* temp, uint16_t* hum
 
 	ret = bme280_sensor_read(&bme280_sensor, pressure, temp, humidity);
 	if (ret != 0) {
-		/*uprintf(uart_num, "Sensor read error: %d\n\r", ret);*/
+		uprintf(uart_num, "Sensor read error: %d\n\r", ret);
 	} else {
 		int comp_temp = 0;
 		uint32_t comp_pressure = 0;
@@ -299,10 +293,10 @@ void bme_display(int uart_num, uint32_t* pressure, uint32_t* temp, uint16_t* hum
 		comp_temp = bme280_compensate_temperature(&bme280_sensor, *temp) / 10;
 		comp_pressure = bme280_compensate_pressure(&bme280_sensor, *pressure) / 100;
 		comp_humidity = bme280_compensate_humidity(&bme280_sensor, *humidity) / 10;
-		/*uprintf(uart_num, "P: %d hPa, T: %d,%02d degC, H: %d,%d rH\n\r",
+		uprintf(uart_num, "P: %d hPa, T: %d,%02d degC, H: %d,%d rH\n\r",
 				comp_pressure,
 				comp_temp / 10,  (comp_temp > 0) ? (comp_temp % 10) : ((-comp_temp) % 10),
-				comp_humidity / 10, comp_humidity % 10);*/
+				comp_humidity / 10, comp_humidity % 10);
 		*temp = comp_temp;
 		*pressure = comp_pressure;
 		*humidity = comp_humidity;
@@ -327,7 +321,7 @@ void uv_config(int uart_num)
 	/* UV sensor */
 	ret = veml6070_configure(&veml6070_sensor);
 	if (ret != 0) {
-		/*uprintf(uart_num, "UV config error: %d\n\r", ret);*/
+		uprintf(uart_num, "UV config error: %d\n\r", ret);
 	}
 	
 }
@@ -338,9 +332,9 @@ void uv_display(int uart_num, uint16_t* uv_raw)
 
 	ret = veml6070_sensor_read(&veml6070_sensor, uv_raw);
 	if (ret != 0) {
-		/*uprintf(uart_num, "UV read error: %d\n\r", ret);*/
+		uprintf(uart_num, "UV read error: %d\n\r", ret);
 	} else {
-		//uprintf(uart_num, "UV: 0x%04x\n\r", *uv_raw);
+		uprintf(uart_num, "UV: 0x%04x\n\r", *uv_raw);
 	}
 }
 
@@ -356,32 +350,36 @@ static volatile message cc_tx_msg;
 void send_on_rf(void)
 {
 	message data;
-	uint8_t cc_tx_data[sizeof(message)+2];
-	cc_tx_data[0]=sizeof(message)+1;  	//length
-	cc_tx_data[1]=DEVICE_ADDRESS;		//source
-	cc_tx_data[2]=NEIGHBOR_ADDRESS;		//dest
-	cc_tx_data[3] = cc_tx_data[0] + cc_tx_data[1] + cc_tx_data[2] + cc_tx_msg.hum + cc_tx_msg.lum + cc_tx_msg.temp;				//CRC
-	data.hum=cc_tx_msg.hum;
-	data.lum=cc_tx_msg.lum;
-	data.temp=cc_tx_msg.temp;
-
-	//data.id = 66;
-	memcpy(&cc_tx_data[2], &data, sizeof(message));
+	uint8_t cc_tx_data[sizeof(message)+4];
+	cc_tx_data[0]=sizeof(message)+3;
+	cc_tx_data[1]=NEIGHBOR_ADDRESS;
+	cc_tx_data[2]=DEVICE_ADDRESS;
+	cc_tx_data[3]=cc_tx_data[0]+cc_tx_data[1]+cc_tx_data[2];
+	memcpy(&cc_tx_data[4], &data, sizeof(message));
 
 	/* Send */
 	if (cc1101_tx_fifo_state() != 0) {
 		cc1101_flush_tx_fifo();
 	}
 
-	int ret = cc1101_send_packet(cc_tx_data, sizeof(message)+2);
+	int ret = cc1101_send_packet(cc_tx_data, sizeof(message)+4);
 
 #ifdef DEBUG
-	uprintf(UART0, "Tx ret: %d\n\r", ret);
-    uprintf(UART0, "RF: data lenght: %d.\n\r", cc_tx_data[0]);
-    uprintf(UART0, "RF: destination: %x.\n\r", cc_tx_data[1]);
-    uprintf(UART0, "RF: message: %c.\n\r", cc_tx_data[2]);
+	uprintf(UART0, "######## MSG SENT ######## \n\r");
+	uprintf(UART0, "\t Tx ret: %d\n\r", ret);
+    uprintf(UART0, "\t RF: data lenght: %d.\n\r", cc_tx_data[0]);
+    uprintf(UART0, "\t RF: destination: %d.\n\r", cc_tx_data[1]);
+    uprintf(UART0, "\t RF: source: %d.\n\r", cc_tx_data[2]);
+	uprintf(UART0, "\tRF: CRC %d.\n\r", cc_tx_data[3]);
+	uprintf(UART0, "######## END SENT MSG ######## \n\r");
 #endif
 }
+
+
+
+
+
+
 
 
 int main(void)
@@ -472,7 +470,3 @@ int main(void)
 	}
 	return 0;
 }
-
-
-
-
