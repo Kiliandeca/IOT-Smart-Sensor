@@ -1,4 +1,5 @@
-
+# Program to control passerelle between Android application
+# and micro-controller through USB tty
 import time
 import argparse
 import signal
@@ -7,7 +8,6 @@ import socket
 import SocketServer
 import serial
 import threading
-import influxdb
 
 HOST           = "0.0.0.0"
 UDP_PORT       = 10000
@@ -24,11 +24,23 @@ class ThreadedUDPRequestHandler(SocketServer.BaseRequestHandler):
         print("{}: client: {}, wrote: {}".format(current_thread.name, self.client_address, data))
         if data != "":
                         if data in MICRO_COMMANDS: # Send message through UART
+
+                                #TO:DO save config in file
+
                                 sendUARTMessage(data)
-                                
+                                socket.sendto("saved", self.client_address) 
+
+                        elif data == "hello": # Send helloBack to tell the client that we exist
+                                socket.sendto("helloBack", self.client_address)      
+
+
                         elif data == "getValues()": # Sent last value received from micro-controller
                                 socket.sendto(LAST_VALUE, self.client_address) 
-                                # TODO: Create last_values_received as global variable      
+                                # TODO: Create last_values_received as global variable   
+
+                        elif data == "getConfig()": # Sent last value received from micro-controller
+                                #TODO: send config saved in file
+                                pass
                         else:
                                 print("Unknown message: ",data)
 
@@ -56,7 +68,7 @@ def initUART():
         ser.rtscts = False     #disable hardware (RTS/CTS) flow control
         ser.dsrdtr = False       #disable hardware (DSR/DTR) flow control
         #ser.writeTimeout = 0     #timeout for write
-        print 'Starting Up Serial Monitor'
+        print ('Starting Up Serial Monitor')
         try:
                 ser.open()
         except serial.SerialException:
@@ -66,19 +78,14 @@ def initUART():
 
 
 def sendUARTMessage(msg):
-    ser.write(msg)
+    ser.write("test")
     print("Message <" + msg + "> sent to micro-controller." )
-
-
-def sendDataToDB(data):
-        client = InfluxDBClient(host="localhost", port=8086, username="miniprojet", password="miniprojet")
-        client.switch_database("miniprojet")
 
 
 # Main program logic follows:
 if __name__ == '__main__':
         initUART()
-        f= open(FILENAME,"a")
+        f= open(FILENAME,"w")
         print ('Press Ctrl-C to quit.')
 
         server = ThreadedUDPServer((HOST, UDP_PORT), ThreadedUDPRequestHandler)
@@ -90,11 +97,14 @@ if __name__ == '__main__':
                 server_thread.start()
                 print("Server started at {} port {}".format(HOST, UDP_PORT))
                 while ser.isOpen() : 
-                        time.sleep(2)
-                        data_str = ser.readline()
-                        f.write(data_str)
-                        LAST_VALUE = data_str
-                        print(data_str)
+                        #time.sleep(100)
+                        if (ser.inWaiting() > 0): # if incoming bytes are waiting 
+                                data_str = ser.read(ser.inWaiting()) 
+                                f.write(data_str)
+                                LAST_VALUE = data_str
+                                print("##### NEW DATA #####")
+                                print(data_str)
+
 
         except (KeyboardInterrupt, SystemExit):
                 server.shutdown()
