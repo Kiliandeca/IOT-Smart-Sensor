@@ -1,0 +1,14 @@
+[0;1;31m●[0m grafana-server.service - Grafana instance
+   Loaded: loaded (/usr/lib/systemd/system/grafana-server.service; enabled; vendor preset: enabled)
+   Active: [0;1;31mfailed[0m (Result: exit-code) since Fri 2019-10-18 10:55:14 BST; 2s ago
+     Docs: http://docs.grafana.org
+  Process: 31407 ExecStart=/usr/sbin/grafana-server --config=${CONF_FILE} --pidfile=${PID_FILE_DIR}/grafana-server.pid cfg:default.paths.logs=${LOG_DIR} cfg:default.paths.data=${DATA_DIR} cfg:default.paths.plugins=${PLUGINS_DIR} cfg:default.paths.provisioning=${PROVISIONING_CFG_DIR} [0;1;31m(code=exited, status=1/FAILURE)[0m
+ Main PID: 31407 (code=exited, status=1/FAILURE)
+
+Oct 18 10:55:13 my-cpe-weather-station systemd[1]: [0;1;39mgrafana-server.service: Failed with result 'exit-code'.[0m
+Oct 18 10:55:14 my-cpe-weather-station systemd[1]: grafana-server.service: Service hold-off time over, scheduling restart.
+Oct 18 10:55:14 my-cpe-weather-station systemd[1]: Stopped Grafana instance.
+Oct 18 10:55:14 my-cpe-weather-station systemd[1]: [0;1;39mgrafana-server.service: Start request repeated too quickly.[0m
+Oct 18 10:55:14 my-cpe-weather-station systemd[1]: [0;1;31mFailed to start Grafana instance.[0m
+Oct 18 10:55:14 my-cpe-weather-station systemd[1]: [0;1;39mgrafana-server.service: Unit entered failed state.[0m
+Oct 18 10:55:14 my-cpe-weather-station systemd[1]: [0;1;39mgrafana-server.service: Failed with result 'exit-code'.[0m
