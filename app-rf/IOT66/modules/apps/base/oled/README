@@ -1,0 +1,30 @@
+Oled display example for displays using SSD130x driver
+
+Copyright 2016 Nathael Pajani <nathael.pajani@ed3l.fr>
+
+
+/* ****************************************************************************
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *************************************************************************** */
+
+This example shows the support of the I²C driver for the SSD130x oled display
+controller, as found on MCOT128064N2Z-YM DISPLAY from MIDAS, used on
+Seeed-Studio's 128 x 64 Oled display board, and on Techno-Innov's Scialys
+display board.
+
+Other display are supported by using charge_pump configuration setting.
+
+The example starts with one pixel line "on" per character line, and then
+displays text received from the uart on the second line of the display.
