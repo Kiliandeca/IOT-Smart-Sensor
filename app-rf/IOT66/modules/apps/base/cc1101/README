@@ -1,0 +1,38 @@
+CC1101 example
+
+Copyright 2013 Nathael Pajani <nathael.pajani@ed3l.fr>
+
+
+/* ****************************************************************************
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *************************************************************************** */
+
+This example shows the support of the CC1101 transceiver.
+
+Data received on the first UART (UART0) is sent on RF when an '\r' or '\n' is
+received.
+Data between any of these characters must not exceed 59 bytes or the whole
+buffer is dropped.
+
+Data received on RF is sent on UART0, with additional "\r\n" appended.
+
+Debug information is sent on UART1
+
+Connexion to a CC1101 module is quite simple, the pin numbers are easily found
+at the beginning of the main.c file (pio_config and cc1101_cs_pin).
+
+
+TODO : Add GDO0 and GDO2 support for special functions and interrupts from
+       CC1101 on packet received with CRC OK.

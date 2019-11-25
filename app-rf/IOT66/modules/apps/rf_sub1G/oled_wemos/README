@@ -1,0 +1,30 @@
+Oled display example for displays using SSD130x driver
+
+Copyright 2016 Nathael Pajani <nathael.pajani@ed3l.fr>
+
+
+/* ****************************************************************************
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *************************************************************************** */
+
+This example shows the support of the I²C driver for the Wemos SSD1306 oled display
+controller, it is a 64 x 48 Oled display board.
+For Wemos Oled you need to connect the reset pin D3, for this example it is connected 
+to the GPIO_0_0 of the micro-controller.
+The other pins are:
+D1 -> SCL
+D2 -> SDA
+GND 
+3V3 
