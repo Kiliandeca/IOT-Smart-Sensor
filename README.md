@@ -7,3 +7,4 @@
 ### YOLO
 * SSID : 4irc-aiot-2
 * PWD : 4irc-aiot-pwd
+* ssh pi@192.x.x.x
