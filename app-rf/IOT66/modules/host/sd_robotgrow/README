@@ -1,0 +1,14 @@
+
+## En root, lecture de la carte Sd, données brutes
+dd if=/dev/sdb of=dump.raw bs=512 count=10000
+
+## Conversion en données lisibles
+cd lpc1224/host/sd_robotgrow/
+./dumper -s dump.raw > data_$(date +%m-%d_%H.%M.%S).txt
+
+
+## En root, Création d'une carte SD
+dd if=/dev/zero of=/dev/sdb bs=512 count=10
+echo "ValidIDX" > valid
+dd if=valid of=/dev/sdb
+

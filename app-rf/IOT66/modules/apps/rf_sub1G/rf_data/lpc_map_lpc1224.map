@@ -773,12 +773,15 @@ Discarded input sections
  .text          0x0000000000000000        0x0 objs/apps/rf_sub1G/rf_data/main.o
  .data          0x0000000000000000        0x0 objs/apps/rf_sub1G/rf_data/main.o
  .bss           0x0000000000000000        0x0 objs/apps/rf_sub1G/rf_data/main.o
+ .text.encrypt  0x0000000000000000       0x70 objs/apps/rf_sub1G/rf_data/main.o
+ .text.decrypt  0x0000000000000000       0x68 objs/apps/rf_sub1G/rf_data/main.o
  .text.bme_config
                 0x0000000000000000       0x10 objs/apps/rf_sub1G/rf_data/main.o
  .text.display_char
                 0x0000000000000000       0x28 objs/apps/rf_sub1G/rf_data/main.o
  .text.shiftLeft
                 0x0000000000000000       0x24 objs/apps/rf_sub1G/rf_data/main.o
+ .data.KEY      0x0000000000000000       0x10 objs/apps/rf_sub1G/rf_data/main.o
  .rodata.cc1101_gdo2
                 0x0000000000000000        0x3 objs/apps/rf_sub1G/rf_data/main.o
 
@@ -1417,7 +1420,7 @@ LOAD objs/apps/rf_sub1G/rf_data/main.o
  .bss.periodic_match
                 0x00000000100007bc        0x1 objs/drivers/rtc.o
  .bss.cc_ptr    0x00000000100007bd        0x1 objs/apps/rf_sub1G/rf_data/main.o
- .bss.loop.4883
+ .bss.loop.4906
                 0x00000000100007be        0x1 objs/apps/rf_sub1G/rf_data/main.o
  *(SORT(COMMON))
  *fill*         0x00000000100007bf        0x1 
