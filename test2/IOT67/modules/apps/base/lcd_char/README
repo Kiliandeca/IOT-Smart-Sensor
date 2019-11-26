@@ -1,0 +1,47 @@
+LCD Character display example
+
+Copyright 2015 Nathael Pajani <nathael.pajani@ed3l.fr>
+
+
+/* ****************************************************************************
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *************************************************************************** */
+
+This example shows the support of the LCD Character displays compatible with the
+Hitachi HD44780 driver.
+This demo application has also been used to test the Max31588 thermocouple to digital
+converter.
+
+
+The demo uses two LCD Character displays, one 20x4 characters connected using 8 data
+lines, and a second 16x2 characters display connected using 4 data lines.
+
+Upon start both displays should print "Techno-Innov".
+
+Data received on UART0 is displayed on the "next" line of the first display as it is
+received, unless it starts with character '/', in which case it goes on the second line
+of the second display.
+
+The first line of the second display is used to display the temperature read from the
+Max31588 over SPI.
+
+
+Note :
+Some functions of the lcd_char library have not been tested.
+The "busy bit" reading is not working properly (always returned as not busy).
+Data reading has not been tested.
+Moving the cursor or the display has not been tested either.
+
+
