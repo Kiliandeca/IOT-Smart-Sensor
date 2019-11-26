@@ -4,20 +4,8 @@
 
 Ce mini-projet nous a été proposé dans le cadre du module **Architecture et protocoles réseaux pour IoT**. Il consiste a piloter dynamiquement l'affichage d'un écran LCD (relié à un µ-contrôleur) grâce à une application mobile android. L'architecture du système est résumé dans le schéma ci-dessous.
 
-```mermaid
-sequenceDiagram
-Capteurs->>µControlleur1: Data
-µControlleur1->>Ecran LCD: Data
-µControlleur1-->>µControlleur2: Data (radio)
-µControlleur2->>Raspberry π: Data
-Raspberry π->>Application Android: Data
-Application Android->>Raspberry π: Contrôle
-Raspberry π->>µControlleur2: Contrôle
-µControlleur2-->>µControlleur1: Contrôle (radio)
-µControlleur1->> Ecran LCD: Contrôle
-```
+![alt text](https://image.noelshack.com/fichiers/2019/48/2/1574797645-untitled-diagram.png "Logo Title Text 1")
 
-Des capteurs d'humidité, de température et de luminosité sont relié à un µ-contrôleur. Celui-ci récupère ces données et les affiche sur l'écran LCD. Les données sont aussi envoyées à l'application mobile. Sur cette application, on peut choisir l'ordre d'affichage des données sur l'écran LCD.
 
 ### µ-Contrôleur & Capteurs
 
