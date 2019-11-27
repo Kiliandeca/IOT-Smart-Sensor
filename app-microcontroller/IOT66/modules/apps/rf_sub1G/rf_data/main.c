@@ -21,6 +21,8 @@
  *
  *************************************************************************** */
 
+
+// Librairies de base utilisées par le microcontroleur
 #include "core/system.h"
 #include "core/systick.h"
 #include "core/pio.h"
@@ -45,24 +47,26 @@
 #include "lib/font.h"
 #include "drivers/adc.h"
 
-#define MODULE_VERSION	0x03
-#define MODULE_NAME "RF Sub1G - USB"
+#define MODULE_VERSION	0x03 // Version du module
+#define MODULE_NAME "RF Sub1G - USB" // Nom du module -> affiché dans minicom
 
-#define RF_868MHz  1
-#define RF_915MHz  0
+#define RF_868MHz  1 // Utilisation de la fréquence 868
+#define RF_915MHz  0 // Désactivation de la fréquence 915
 #if ((RF_868MHz) + (RF_915MHz) != 1)
 #error Either RF_868MHz or RF_915MHz MUST be defined.
 #endif
 
-#define DEBUG 1
-#define BUFF_LEN 60
-#define RF_BUFF_LEN  64
-#define RF_BUFF_LEN2  64
-#define SELECTED_FREQ  FREQ_SEL_48MHz
+#define DEBUG 1 // Active le débugage
+#define BUFF_LEN 60 // Taille du buffer
+#define RF_BUFF_LEN  64 // Taille buffer
+#define RF_BUFF_LEN2  64 // Taille buffer
+#define SELECTED_FREQ  FREQ_SEL_48MHz // Fréquence choisit
 
 // Configuration des adresses
 #define DEVICE_ADDRESS  66 /* Adresse source de l'appareil */
 #define NEIGHBOR_ADDRESS 67 /* Adresse destination de l'appareil */
+
+
 
 
 /***************************************************************************** */
@@ -97,7 +101,39 @@ const struct pio status_led_red = LPC_GPIO_0_29;
 
 const struct pio button = LPC_GPIO_0_12; /* ISP button */
 
-// Message
+
+/***************************************************************************** */
+/* Chiffrement configuration */
+void encrypt(uint8_t *data, uint8_t *key);
+void decrypt(uint8_t *data, uint8_t *key);
+
+static const uint8_t sbox[256] = {
+    //0     1    2      3     4    5     6     7      8    9     A      B    C     D     E     F
+    0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
+    0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0,
+    0xb7, 0xfd, 0x93, 0x26, 0x36, 0x3f, 0xf7, 0xcc, 0x34, 0xa5, 0xe5, 0xf1, 0x71, 0xd8, 0x31, 0x15,
+    0x04, 0xc7, 0x23, 0xc3, 0x18, 0x96, 0x05, 0x9a, 0x07, 0x12, 0x80, 0xe2, 0xeb, 0x27, 0xb2, 0x75,
+    0x09, 0x83, 0x2c, 0x1a, 0x1b, 0x6e, 0x5a, 0xa0, 0x52, 0x3b, 0xd6, 0xb3, 0x29, 0xe3, 0x2f, 0x84,
+    0x53, 0xd1, 0x00, 0xed, 0x20, 0xfc, 0xb1, 0x5b, 0x6a, 0xcb, 0xbe, 0x39, 0x4a, 0x4c, 0x58, 0xcf,
+    0xd0, 0xef, 0xaa, 0xfb, 0x43, 0x4d, 0x33, 0x85, 0x45, 0xf9, 0x02, 0x7f, 0x50, 0x3c, 0x9f, 0xa8,
+    0x51, 0xa3, 0x40, 0x8f, 0x92, 0x9d, 0x38, 0xf5, 0xbc, 0xb6, 0xda, 0x21, 0x10, 0xff, 0xf3, 0xd2,
+    0xcd, 0x0c, 0x13, 0xec, 0x5f, 0x97, 0x44, 0x17, 0xc4, 0xa7, 0x7e, 0x3d, 0x64, 0x5d, 0x19, 0x73,
+    0x60, 0x81, 0x4f, 0xdc, 0x22, 0x2a, 0x90, 0x88, 0x46, 0xee, 0xb8, 0x14, 0xde, 0x5e, 0x0b, 0xdb,
+    0xe0, 0x32, 0x3a, 0x0a, 0x49, 0x06, 0x24, 0x5c, 0xc2, 0xd3, 0xac, 0x62, 0x91, 0x95, 0xe4, 0x79,
+    0xe7, 0xc8, 0x37, 0x6d, 0x8d, 0xd5, 0x4e, 0xa9, 0x6c, 0x56, 0xf4, 0xea, 0x65, 0x7a, 0xae, 0x08,
+    0xba, 0x78, 0x25, 0x2e, 0x1c, 0xa6, 0xb4, 0xc6, 0xe8, 0xdd, 0x74, 0x1f, 0x4b, 0xbd, 0x8b, 0x8a,
+    0x70, 0x3e, 0xb5, 0x66, 0x48, 0x03, 0xf6, 0x0e, 0x61, 0x35, 0x57, 0xb9, 0x86, 0xc1, 0x1d, 0x9e,
+    0xe1, 0xf8, 0x98, 0x11, 0x69, 0xd9, 0x8e, 0x94, 0x9b, 0x1e, 0x87, 0xe9, 0xce, 0x55, 0x28, 0xdf,
+    0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16 };
+
+uint8_t key[16] = {0x63, 0x7c, 0x77, 0x7b, 0xf2, 0xa5, 0xd8, 0x31, 0x15, 0x04, 0xc7, 0x23, 0xc3, 0x3b, 0xd6, 0x16 };
+/***************************************************************************** */
+
+
+
+
+/***************************************************************************** */
+/* Définition du struct message */
 struct message 
 {
 	uint32_t temp;
@@ -105,44 +141,91 @@ struct message
 	uint32_t lum;
 };
 typedef struct message message;
-
-
-char first;
-char second;
-char third;
+/***************************************************************************** */
 
 
 
-/*********************************** ENCRYPT ET DECRYPT ****************************************** */
-uint32_t KEY[4]={0xC6EF3720,0xC6EF3720,0xC6EF3720,0xC6EF3720};   // Key space for bit shifts
+
+/***************************************************************************** */
+/* Fonction permettant le chiffrement et de déchiffrement  */
+void encrypt(uint8_t *data, uint8_t *key){
+
+    int i, j, k;
+    uint8_t buff;
+
+    for(k=0;k<9;k++){
+        // Sub byte
+        for(i=0;i<16;i++){
+            data[i] = sbox[data[i]];
+        }
+
+        // Rotate byte 
+        for(i=0;i<4;i++){
+            for(j=0;j<i;j++){
+                buff = data[i*4];
+                data[i*4] = data[i*4+1];
+                data[i*4+1] = data[i*4+2];
+                data[i*4+2] = data[i*4+3];
+                data[i*4+3] = buff;
+            }
+        }
+
+        // Mix Columns
 
 
-void encrypt(uint32_t* v) {
-  uint32_t v0=v[0], v1=v[1], sum=0, i;             // set up
-  uint32_t delta=0x9e3779b9;                       // a key schedule constant
-  for (i=0; i < 32; i++) {                         // basic cycle start
-    sum += delta;
-    v0 += ((v1<<4) + KEY[0]) ^ (v1 + sum) ^ ((v1>>5) + KEY[1]);
-    v1 += ((v0<<4) + KEY[2]) ^ (v0 + sum) ^ ((v0>>5) + KEY[3]);  
-  }                                                // end cycle 
-  v[0]=v0; v[1]=v1;
-}       
+        // Add Round Key
+        for(i=0;i<16;i++){
+            data[i] ^= key[i];
+        }
+    }
 
-void decrypt (uint32_t* v) {
-    uint32_t v0=v[0], v1=v[1], sum=0xC6EF3720, i;  // set up 
-    uint32_t delta=0x9e3779b9;                     // a key schedule constant 
-    for (i=0; i<32; i++) {                         // basic cycle start 
-        v1 -= ((v0<<4) + KEY[2]) ^ (v0 + sum) ^ ((v0>>5) + KEY[3]);
-        v0 -= ((v1<<4) + KEY[0]) ^ (v1 + sum) ^ ((v1>>5) + KEY[1]);
-        sum -= delta;
-    }                                              // end cycle 
-    v[0]=v0; v[1]=v1;
+    
+
+}
+
+void decrypt(uint8_t *data, uint8_t *key){
+    
+    int i, j, k;
+    uint8_t buff;
+
+    for(k=0;k<9;k++){
+        // Remove Round Key
+        for(i=0;i<16;i++){
+            data[i] ^= key[i];
+        }
+
+        // Unmix Columns
+
+        // Unrotate byte 
+        for(i=0;i<4;i++){
+            for(j=0;j<i;j++){
+                buff = data[i*4+3];
+                data[i*4+3] = data[i*4+2];
+                data[i*4+2] = data[i*4+1];
+                data[i*4+1] = data[i*4];
+                data[i*4] = buff;
+            }
+        }
+
+        // Unsub byte
+        for(i=0;i<16;i++){
+            j = 0;
+            while(sbox[j] != data[i]){
+                j++;
+            }
+            data[i] = j;
+        }
+
+    }
+
 }
 /***************************************************************************** */
 
 
 
+
 /***************************************************************************** */
+/* Configuration du microcontrôleur */
 void system_init()
 {
 	/* Stop the watchdog */
@@ -198,13 +281,19 @@ void rf_config(void)
 	uprintf(UART0, "CC1101 RF link init done.\n\r");
 #endif
 }
+/***************************************************************************** */
 
 
+
+
+/***************************************************************************** */
+/* Gestion de la réception de msg en radio fréquence */
 uint8_t chenillard_active = 1;
 message msg_data;
 void handle_rf_rx_data(void)
 {
-	uprintf(UART0, "######## MSG RECEIVED ######## \n\r");
+	// uprintf(UART0, "######## MSG RECEIVED ######## \n\r");
+
 	uint8_t data[RF_BUFF_LEN];
 	int8_t ret = 0;
 	uint8_t status = 0;
@@ -215,39 +304,30 @@ void handle_rf_rx_data(void)
 	cc1101_enter_rx_mode();
 	
 	
-
+	// Calcule du CRC recu : addition de la taille du paquet + adresse destinataire + addresse source
 	int crcReceived = data[0] + data[1] + data[2];
 
+	// Si l'adresse source, l'adresse destination et le CRC sont valident alors on récupère le contenu du message
 	if(data[1] == DEVICE_ADDRESS && data[2] == NEIGHBOR_ADDRESS && data[3] == crcReceived ){
-		memcpy(&msg_data,&data[4],sizeof(message));
-		uprintf(UART0, "######## MSG RECEIVED ######## \n\r");
-		uprintf(UART0, "\t Tx ret: %d\n\r", ret);
-		uprintf(UART0, "\t RF: data lenght: %d.\n\r", data[0]);
-		uprintf(UART0, "\t RF: destination : %d.\n\r", data[1]);
-		uprintf(UART0, "\t RF: source : %d.\n\r", data[2]);
-		uprintf(UART0, "\t RF: CRC RECU : %d.\n\r", data[3]);
+		memcpy(&msg_data,&data[4],sizeof(message)); // Récupération du contenu du message
+		
+		int8_t test[3] = {msg_data.temp,msg_data.hum,msg_data.lum};
 
-		uprintf(UART0, "\t RF: pos temp : %x. \n\r", msg_data.temp);
-		uprintf(UART0, "\t RF: pos hum : %d.\n\r", msg_data.hum);
-		uprintf(UART0, "\t RF: pos lum : %d.\n\r", msg_data.lum);
-		uprintf(UART0, "######## END RECEIVED MSG ######## \n\r");
+		decrypt(test,key);
+
+		msg_data.temp = test[0];
+		msg_data.hum = test[1];
+		msg_data.lum = test[2];
 
 	}
-
-	
-
-
-#ifdef DEBUG
-	/* JSON PRINT*/
-	// uprintf(UART0, "{ \"Lux\": %d, \"Temp\": %d.%02d, \"Humidity\": %d.%d}\n\r",  
-	// 				msg_data.lum,
-	// 				msg_data.temp / 10,  (msg_data.temp > 0) ? (msg_data.temp % 10) : ((-msg_data.temp) % 10),
-	// 				msg_data.hum / 10, msg_data.hum % 10);
-    /*uprintf(UART0, "RF: message: %c.\n\r", data[2]);*/
-#endif
-
 }
+/***************************************************************************** */
 
+
+
+
+/***************************************************************************** */
+/* Gestion des leds sur le microcontrôleur */
 static volatile uint32_t cc_tx = 0;
 static volatile uint8_t cc_tx_buff[RF_BUFF_LEN];
 static volatile uint8_t cc_ptr = 0;
@@ -266,6 +346,9 @@ void activate_chenillard(uint32_t gpio) {
         chenillard_activation_request = 1;
     }
 }
+/***************************************************************************** */
+
+
 
 
 /***************************************************************************** */
@@ -355,6 +438,10 @@ void bme_display(int uart_num, uint32_t* pressure, uint32_t* temp, uint16_t* hum
 		*humidity = comp_humidity;
 	}
 }
+/***************************************************************************** */
+
+
+
 
 /***************************************************************************** */
 /* UV */
@@ -394,6 +481,7 @@ void uv_display(int uart_num, uint16_t* uv_raw)
 static volatile uint32_t update_display = 0;
 
 /***************************************************************************** */
+
 void periodic_display(uint32_t tick)
 {
 	update_display = 1;
@@ -403,22 +491,32 @@ static volatile message cc_tx_msg;
 void send_on_rf(void)
 {
 	message data;
-	uint8_t cc_tx_data[sizeof(message)+4];
-	cc_tx_data[0]=sizeof(message)+3;
+
+
+	int8_t test[8] = {cc_tx_msg.lum/100, (cc_tx_msg.lum - (cc_tx_msg.lum/100)*100)/10, cc_tx_msg.lum%10, cc_tx_msg.temp/100, (cc_tx_msg.temp - (cc_tx_msg.temp/100)*100)/10, cc_tx_msg.temp%10, (cc_tx_msg.hum / 10), (cc_tx_msg.hum % 10) };
+
+	encrypt(test,key);
+
+	uint8_t cc_tx_data[12];//12
+	cc_tx_data[0]=11;//11
 	cc_tx_data[1]=NEIGHBOR_ADDRESS;
 	cc_tx_data[2]=DEVICE_ADDRESS;
 	cc_tx_data[3]=cc_tx_data[0]+cc_tx_data[1]+cc_tx_data[2];
-	data.hum=cc_tx_msg.hum;
-	data.lum=cc_tx_msg.lum;
-	data.temp=cc_tx_msg.temp;
-	memcpy(&cc_tx_data[4], &data, sizeof(message));
-
+	cc_tx_data[4]=test[0];
+	cc_tx_data[5]=test[1];
+	cc_tx_data[6]=test[2];
+	cc_tx_data[7]=test[3];
+	cc_tx_data[8]=test[4];
+	cc_tx_data[9]=test[5];
+	cc_tx_data[10]=test[6];
+	cc_tx_data[11]=test[7];
+	
 	/* Send */
 	if (cc1101_tx_fifo_state() != 0) {
 		cc1101_flush_tx_fifo();
 	}
 
-	int ret = cc1101_send_packet(cc_tx_data, sizeof(message)+4);
+	int ret = cc1101_send_packet(cc_tx_data, sizeof(message)+12);
 
 #ifdef DEBUG
 	uprintf(UART0, "######## MSG SENT ######## \n\r");
@@ -430,6 +528,9 @@ void send_on_rf(void)
 	uprintf(UART0, "######## END SENT MSG ######## \n\r");
 #endif
 }
+/***************************************************************************** */
+
+
 
 
 /***************************************************************************** */
@@ -452,17 +553,18 @@ struct oled_display display = {
 	.display_offset = 4,
   .gddram = gddram,
 };
+/***************************************************************************** */
+
+
+
+
+/***************************************************************************** */
+/* Gestion de l'affichage LCD */
 
 #define ROW(x)   VERTICAL_REV(x)
 DECLARE_FONT(font);
 
-void display_char(uint8_t line, uint8_t col, uint8_t c)
-{
-	uint8_t tile = (c > FIRST_FONT_CHAR) ? (c - FIRST_FONT_CHAR) : 0;
-	uint8_t* tile_data = (uint8_t*)(&font[tile]);
-	ssd130x_buffer_set_tile(gddram, col, line, tile_data);
-}
-
+/* Permet d'afficher du text sur l'écran LCD en positionnant l'axe vertical et horizontal */
 int display_line(uint8_t line, uint8_t col, char* text)
 {
 	int len = strlen((char*)text);
@@ -483,7 +585,8 @@ int display_line(uint8_t line, uint8_t col, char* text)
 	return len;
 }
 
-//function bloack
+/* Cette fonction permet de faire défiler du text sur l'écran LCD */
+/* Permet de décaler les char d'une array en spécifiant le nombre de caractère à décaler à chaque appel à la fonction */
 void shiftLeft (char myarray[], int size, int shiftBy)
 {
     if(shiftBy > size){
@@ -505,17 +608,29 @@ void shiftLeft (char myarray[], int size, int shiftBy)
 
     }
 }
-/***************************************************************************** */
 
-
+/* Cette fonction permet d'afficher les informations à l'écran en fonction d'un ordre (variable global) */
+/* L'argument info est un struct de type message qui contient les données des capteurs */
 void gestionAffichage(message info){
-	char data[20];
-	
-	int ligne_temp;
-	int ligne_lum;
-	int ligne_hum;
+	char data[20]; // Buffer utilisé pour les données à afficher
 
-	if (msg_data.temp == 1 && msg_data.lum == 2){
+	int ligne_temp; // Numéro de ligne (Y) de la température
+	int ligne_lum; // Numéro de ligne (Y) de la luminosité
+	int ligne_hum; // Numéro de ligne (Y) de l'humidité
+
+	/*
+			msg_data est définit à la réception d'un message
+				msg_data.temp -> représente l'ordre d'affichage de la température
+				msg_data.lum  -> représente l'ordre d'affichage de la luminosité
+				msg_data.hum  -> représente l'ordre d'affichage de l'humidité
+
+	 		1,2,3 définit l'ordre d'affichage -> 
+	 			1 premier
+	 			2 second
+				3 troisième
+	*/
+
+	if (msg_data.temp == 1 && msg_data.lum == 2){ // Exemple : température en premier, luminosité en second et humidité en troisième
 		ligne_temp = 3;
 		ligne_lum = 4;
 		ligne_hum = 5;
@@ -544,22 +659,26 @@ void gestionAffichage(message info){
 		ligne_lum = 4;
 		ligne_hum = 3;	
 	}
-	if (ligne_temp != 0 && ligne_hum !=0 && ligne_lum != 0){
-		snprintf(data, 20, "                  ");
-		display_line(0, 0, data);
-		uprintf(UART0,"\t \t \t \t Temp :%d Lum:%d Hum: %d",ligne_temp,ligne_hum,ligne_lum);
-		snprintf(data, 20, "Celsius: %d,%d", info.temp / 10,  (info.temp > 0) ? (info.temp % 10) : ((-info.temp) % 10));
-		display_line(ligne_temp, 0, data);
-		snprintf(data, 20, "Luminosity: %d", info.lum);
-		display_line(ligne_lum, 0, data);
-		snprintf(data, 20, "Humidity: %d", info.hum / 10, info.hum % 10);
-		display_line(ligne_hum, 0, data);
+	if (ligne_temp != 0 && ligne_hum !=0 && ligne_lum != 0){ // si toutes les lignes (axe y) des données ont été définit
+		snprintf(data, 20, "                  "); // Réinitialise l'affichage de la première ligne
+		display_line(0, 0, data); // Réinitialise l'affichage de la première ligne
+
+		snprintf(data, 20, "Celsius: %d,%d   ", info.temp / 10,  (info.temp > 0) ? (info.temp % 10) : ((-info.temp) % 10)); // Affichage de la température
+		display_line(ligne_temp, 0, data); // Affichage de la température
+
+		snprintf(data, 20, "Lum: %d      ", info.lum); // Affichage de la luminosité
+		display_line(ligne_lum, 0, data); // Affichage de la luminosité
+
+		snprintf(data, 20, "Hum: %d      ", info.hum / 10, info.hum % 10); // Affichage de l'humidité
+		display_line(ligne_hum, 0, data); // Affichage de l'humidité
 	}
-	
 }
+/***************************************************************************** */
 
 
 
+/***************************************************************************** */
+/* Programme principale */
 int main(void)
 {
 	int ret = 0;
@@ -597,12 +716,32 @@ int main(void)
 	
 	uprintf(UART0, "App started\n\r");
 
+
+	int8_t test[16] = {'c','e','c','i',' ','e','s','t',' ','u','n',' ','t','e','s','t'};
+    uprintf(UART0, "av encrypt - %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x\n\r",test[0],test[1],test[2],test[3],test[4],test[5],test[6],test[7],test[8],test[9],test[10],test[11],test[12],test[13],test[14],test[15]);
+    encrypt(test,key);
+    uprintf(UART0, "ap encrypt - %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x\n\r",test[0],test[1],test[2],test[3],test[4],test[5],test[6],test[7],test[8],test[9],test[10],test[11],test[12],test[13],test[14],test[15]);
+    decrypt(test,key);
+    uprintf(UART0, "ap decrypt - %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x\n\r",test[0],test[1],test[2],test[3],test[4],test[5],test[6],test[7],test[8],test[9],test[10],test[11],test[12],test[13],test[14],test[15]);
+
+
+
+    uint8_t test2[16] = {128,'2','3'};
+    uprintf(UART0, "av encrypt - %d %02x %02x \n\r",test2[0],test2[1],test2[2]);
+    encrypt(test2,key);
+    uprintf(UART0, "ap encrypt - %d %02x %02x \n\r",test2[0],test2[1],test2[2]);
+    decrypt(test2,key);
+    uprintf(UART0, "ap decrypt - %d %02x %02x \n\r",test2[0],test2[1],test2[2]);
+
 	char text[] = "Bienvenue !"; // Text défilant sur le haut de l'écran
-	while (1) {
-		char data[11];
-		shiftLeft(text, 11, 1);
-		snprintf(data, 40, text);
-		display_line(1, 0, data);
+	while (1) { // Boucle infinie
+
+		/* Gestion affichage text défilant sur le haut de l'écran */
+		char data[11]; // Buffer pour le contenu du message
+		shiftLeft(text, 11, 1); // Décalage de la chaine de 1 caractère
+		snprintf(data, 40, text); // Copie de text vers data
+		display_line(1, 0, data); // Affichage du text à la ligne 1
+
 		/* And send to screen */
 		ret = ssd130x_display_full_screen(&display);
 		if (ret < 0) {
@@ -624,24 +763,27 @@ int main(void)
 		if (update_display == 1) {
 			uint16_t uv = 0, ir = 0, humidity = 0;
 			uint32_t pressure = 0, temp = 0, lux = 0;
-			
+	
 			/* Read the sensors */
 			uv_display(UART0, &uv);
 			bme_display(UART0, &pressure, &temp, &humidity);
 			lux_display(UART0, &ir, &lux);
+			/* Set variable sensors */
 			cc_tx_msg.temp=temp;
 			cc_tx_msg.hum=humidity;
 			cc_tx_msg.lum=lux;
-			update_display = 0;
-			gestionAffichage(cc_tx_msg);
-			send_on_rf();
 
+			update_display = 0;
+
+			gestionAffichage(cc_tx_msg); // Affichage des infos sur l'écran
+			send_on_rf(); // Envoie d'un msg en radio fréquence
 		}
 
 		/* RF */
 		if (cc_tx == 1) {
 			cc_tx = 0;
 		}
+
 		/* Do not leave radio in an unknown or unwated state */
 		do {
 			status = (cc1101_read_status() & CC1101_STATE_MASK);
@@ -662,12 +804,10 @@ int main(void)
 			check_rx = 0;
 			handle_rf_rx_data();
 		}
-
-
-		
 	}
 	return 0;
 }
+/***************************************************************************** */
 
 
 

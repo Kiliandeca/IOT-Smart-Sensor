@@ -4,7 +4,7 @@
 
 Ce mini-projet nous a été proposé dans le cadre du module **Architecture et protocoles réseaux pour IoT**. 
 L'objectif de ce mini-projet est de créer une petite infrastructure connecté :
- * Un capteur d'humidité, de luminosité et de température est branché à un microcontrôleur, ces données sont affichées sur un écran LCD. 
+ * Un capteur d'humidité, de luminosité et de température sont branchés à un microcontrôleur, ces données sont affichées sur un écran LCD. 
  * Ce microcontrôleur envoie les données des capteurs par radio-fréquence à un second microcontrôleur appelé passerelle. La passerelle retransmet les données reçus au Raspberry Pi. 
  * Le Raspberry Pi retransmet également ces données (via un réseau Wifi) et un smartphone les reçoit et affiches les données à l'écran. 
  * Le smartphone est également capable de changer l'ordre d'affichage des données sur l'écran LCD du microcontrôleur.
@@ -19,9 +19,26 @@ L'objectif de ce mini-projet est de créer une petite infrastructure connecté :
 
 #### Protocole de communication
 
+Pour contrôler les communication, nous avons mis en place un protocole de communication. Voici le format de trame que notre protocole prévoie d'utiliser :
+
+  * Adresse Source : Identifiant du µ-contrôleur émetteur du paquet
+  * Adresse Destination : Identifiant du µ-contrôleur récepteur du paquet
+  * Taille de la trame
+  * Contrôle d'intégrité : on additionne les valeurs de chaque champs de la trame (sauf celui-ci) pour que la destination puisse vérifier l'intégrité de la trame
+  * Données
+
 #### Envoie des données
 
+Pour envoyer les données sur le canal radio, nous avons créer un programme en C. Nous utilisons la librairie fournie pour ce projet. Il nous suffit de placer les données dans un buffer, que nous passons à une fonction de cette librairie.
+
+Voici le code correspondant à l'envoi des donnnées :
+
 #### Réception des données
+
+Tout comme l'envoi, la réception des données est gérée grâce à une fonction de la librairie, qui va extraire la trame vers un buffer. Lors de la réception, on vérifie que l'adresse source 
+
+
+#### Chiffrement
 
 ### Configuration des capteurs
 
