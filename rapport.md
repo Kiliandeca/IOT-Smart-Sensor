@@ -27,9 +27,18 @@ Pour contrôler les communication, nous avons mis en place un protocole de commu
   * Contrôle d'intégrité : on additionne les valeurs de chaque champs de la trame (sauf celui-ci) pour que la destination puisse vérifier l'intégrité de la trame
   * Données
 
-#### Envoie des données   
+#### Envoie des données
+
+Pour envoyer les données sur le canal radio, nous avons créer un programme en C. Nous utilisons la librairie fournie pour ce projet. Il nous suffit de placer les données dans un buffer, que nous passons à une fonction de cette librairie.
+
+Voici le code correspondant à l'envoi des donnnées :
 
 #### Réception des données
+
+Tout comme l'envoi, la réception des données est gérée grâce à une fonction de la librairie, qui va extraire la trame vers un buffer. Lors de la réception, on vérifie que l'adresse source 
+
+
+#### Chiffrement
 
 ### Configuration des capteurs
 
