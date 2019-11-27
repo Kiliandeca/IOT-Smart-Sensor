@@ -84,13 +84,29 @@ C'est le deuxième µ-contrôleur qui sert de passerelle avec la raspberry π . 
 
 ### 3 - Le Raspberry π 
 
-La Raspberry π nous sert de serveur applicatif, puisqu'il enregistre les données et embarque notamment Grafana afin de générer des vues de ses donnés. Il communique aussi avec l'application Android pour lui envoyé des données et recevoir des ordres.
+La Raspberry π nous sert de serveur applicatif, puisqu'il enregistre les données et embarque notamment Grafana afin de générer des vues de ses donnés. Il communique aussi avec l'application Android pour lui envoyé des données et recevoir des ordres. 
+
+Pour se connecter à la respberry l'application envoi un message UDP "Hello", vous valider la connection la raspberry renvoi un message "HelloBack". 
 
 ##### Enregistrement des données
+Les données reçus depuis le microcontroller sont en format JSON, nous les enregistrons sur une base de donnée InfluxDB. C'est une BDD spécialement conçue pour stocker des données horodatés. 
 
-##### Serveur Grafana
+##### Tableau de bord Grafana
+Nous avons mis en place un dashboard Grafana pour permettre la visualisation des données reçues (température, humidité, liminausité) enf onction du temps. Notre instance Grafana se connecte directement à la base de données InfluxDB pour récupérer les données. Nous pouvons visualiser l'évolution de la température, de l'humidité et de la luminosité en choissisant l'échelle (5 minutes, 1 heure, 1 journée).
+
+Nous avons également ajouté les graphiques d'usages des ressources de la raspberry (RAM, espace dique, CPU). Cela nous permet de detecter facilement un problème de performance.
+
 
 ### 4 - L'Application Mobile
+
+### Connection au server Raspberry
+
+
+#### Affichage des données
+
+
+#### Ordre d'affichage des données
+Depuis l'application, l'utilisateur, peut choisir l'ordre dans lequel les données sont affichés. Les trois types de données sont affichés et l'utilisateur peut modifier l'ordre grâce à un simple glisser déposer. Cette modification est communiqué au serveur raspberry qui puis envoyer jusqu'au micro controller qui controler l'affichage OLED sur lequel les données seront affichés dans le nouvel ordre. 
 
 ### Retour d'expérience
 
