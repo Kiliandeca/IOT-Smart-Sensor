@@ -4,7 +4,7 @@
 
 Ce mini-projet nous a été proposé dans le cadre du module **Architecture et protocoles réseaux pour IoT**. 
 L'objectif de ce mini-projet est de créer une petite infrastructure connecté :
- * Un capteur d'humidité, de luminosité et de température est branché à un microcontrôleur, ces données sont affichées sur un écran LCD. 
+ * Un capteur d'humidité, de luminosité et de température sont branchés à un microcontrôleur, ces données sont affichées sur un écran LCD. 
  * Ce microcontrôleur envoie les données des capteurs par radio-fréquence à un second microcontrôleur appelé passerelle. La passerelle retransmet les données reçus au Raspberry Pi. 
  * Le Raspberry Pi retransmet également ces données (via un réseau Wifi) et un smartphone les reçoit et affiches les données à l'écran. 
  * Le smartphone est également capable de changer l'ordre d'affichage des données sur l'écran LCD du microcontrôleur.
@@ -19,7 +19,15 @@ L'objectif de ce mini-projet est de créer une petite infrastructure connecté :
 
 #### Protocole de communication
 
-#### Envoie des données
+Pour contrôler les communication, nous avons mis en place un protocole de communication. Voici le format de trame que notre protocole prévoie d'utiliser :
+
+  * Adresse Source : Identifiant du µ-contrôleur émetteur du paquet
+  * Adresse Destination : Identifiant du µ-contrôleur récepteur du paquet
+  * Taille de la trame
+  * Contrôle d'intégrité : on additionne les valeurs de chaque champs de la trame (sauf celui-ci) pour que la destination puisse vérifier l'intégrité de la trame
+  * Données
+
+#### Envoie des données   
 
 #### Réception des données
 
