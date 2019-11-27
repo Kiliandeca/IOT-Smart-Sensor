@@ -1,0 +1,78 @@
+diff --git a/apps/base/i2c_temp/main.c b/apps/base/i2c_temp/main.c
+index 9915a9f..f7ec0f4 100644
+--- a/apps/base/i2c_temp/main.c
++++ b/apps/base/i2c_temp/main.c
+@@ -34,7 +34,7 @@
+ 
+ 
+ #define MODULE_VERSION    0x04
+-#define MODULE_NAME "GPIO Demo Module"
++#define MODULE_NAME "RF Sub-1GHz"
+ 
+ 
+ #define SELECTED_FREQ  FREQ_SEL_48MHz
+@@ -64,8 +64,19 @@ struct tmp101_sensor_config tmp101_sensor = {
+ 
+ const struct pio temp_alert = LPC_GPIO_0_7;
+ 
+-const struct pio status_led_green = LPC_GPIO_1_4;
+-const struct pio status_led_red = LPC_GPIO_1_5;
++/* Correction TP1 
++ * Information found in the module documentation
++ * (http://techdata.techno-innov.fr/Modules/RF-Sub1G/System_Reference_Manual_RF_Sub1GHz_USB_v03.pdf)
++ * Section 4.6 - User Led and Button
++ * User led is on signals PIO0_28 (Green led) and PIO0_29 (Red led)
++ */
++const struct pio status_led_green = LPC_GPIO_0_28;
++const struct pio status_led_red = LPC_GPIO_0_29;
++
++/* Correction TP1
++ * Define the temperature level trigering the led color switch
++ */
++#define TEMP_SEUIL  (28 * 10)  /* The switch level is in deci-degrees */
+ 
+ /***************************************************************************** */
+ /* Temperature */
+@@ -105,6 +116,24 @@ void temp_display(int uart_num)
+ 		uprintf(uart_num, "Temp read: %d,%d - raw: 0x%04x.\r\n",
+ 				(deci_degrees/10), (deci_degrees%10), raw);
+ 	}
++
++	/* Correction TP1
++	 * Change the status led color depending on the temperature
++	 */
++	/* Version 1 : use the status led functions */
++	if (deci_degrees >= TEMP_SEUIL) {
++		status_led(red_only);
++	} else {
++		status_led(green_only);
++	}
++	/* Version 2 : use the gpio functions */
++	if (deci_degrees >= TEMP_SEUIL) {
++		gpio_set(status_led_red);
++		gpio_clear(status_led_green);
++	} else {
++		gpio_set(status_led_green);
++		gpio_clear(status_led_red);
++	}
+ }
+ 
+ 
+@@ -153,7 +182,16 @@ int main(void)
+ 	temp_config(UART0);
+ 
+ 	while (1) {
+-		chenillard(250);
++		/* Correction TP1
++		 * Remove the call to chenillard() which uses the status Led.
++		 * Replace it by a call to msleep() in order to keep a delay in the main loop.
++		 */
++		msleep(250);
++		/* Correction TP1
++		 * We will modify the function used to display the temperature on the UART
++		 * in order to set the led according to the temperature, which is also a
++		 * (quite basic) temperature display
++		 */
+ 		temp_display(UART0);
+ 	}
+ 	return 0;
