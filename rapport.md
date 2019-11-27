@@ -1,3 +1,4 @@
+
 # Mini-Projet IoT
 
 ## 0 - Introduction
@@ -39,6 +40,13 @@ Tout comme l'envoi, la réception des données est gérée grâce à une fonctio
 
 
 #### Chiffrement
+La mise en place du chiffrement des échanges entre les deux microcontrôleurs a été compliqué a mettre en place, nous avons effectués de nombreuses tentatives pour mettre en place un algorithme AES.
+
+Après de nombreuses tentatives (succédé par des échecs) pour chiffrer les données en utilisant des algorithmes AES trouvés en licence GPL. A la suite de ces echexs
+
+
+
+
 
 ### Configuration des capteurs
 
