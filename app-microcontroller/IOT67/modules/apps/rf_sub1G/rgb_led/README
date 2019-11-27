@@ -1,0 +1,31 @@
+Support for the Sub 1GHz module in USB or UEXT version - RGB Led example
+
+Copyright 2013 Nathael Pajani <nathael.pajani@ed3l.fr>
+
+
+/* ****************************************************************************
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *************************************************************************** */
+
+This module uses the CC1101 transceiver to provide Sub 1GHz Rf connectivity.
+
+The module also integrates a TMP101 temparature sensor, the usual bi-color led
+used for status, a RTC quartz, a DC-DC step-up for button battery power source
+support, and an extension port with a set of gpio, including ADC (2), PWM (3),
+I2C and SWD debug port.
+
+This sample programm can be used on two modules to demonstrate RF communication.
+One is used to send commands to the other one, which changes the RGB Led color
+and can also report current temperature and battery status.
