@@ -106,24 +106,27 @@ La Raspberry π nous sert de serveur applicatif, puisqu'il enregistre les donné
 Pour se connecter à la respberry l'application envoi un message UDP "Hello", vous valider la connection la raspberry renvoi un message "HelloBack". 
 
 ##### Enregistrement des données
-Les données reçus depuis le microcontroller sont en format JSON, nous les enregistrons sur une base de donnée InfluxDB. C'est une BDD spécialement conçue pour stocker des données horodatés. 
+Les données reçues depuis le microcontroller sont en format JSON, nous les enregistrons sur une base de données InfluxDB. C'est une BDD spécialement conçue pour stocker des données horodatés. 
 
 ##### Tableau de bord Grafana
-Nous avons mis en place un dashboard Grafana pour permettre la visualisation des données reçues (température, humidité, liminausité) enf onction du temps. Notre instance Grafana se connecte directement à la base de données InfluxDB pour récupérer les données. Nous pouvons visualiser l'évolution de la température, de l'humidité et de la luminosité en choissisant l'échelle (5 minutes, 1 heure, 1 journée).
+Nous avons mis en place un dashboard Grafana pour permettre la visualisation des données reçues (température, humidité, liminausité) en fonction du temps. Notre instance Grafana se connecte directement à la base de données InfluxDB pour récupérer les données. Nous pouvons visualiser l'évolution de la température, de l'humidité et de la luminosité en choissisant l'échelle (5 minutes, 1 heure, 1 journée).
 
-Nous avons également ajouté les graphiques d'usages des ressources de la raspberry (RAM, espace dique, CPU). Cela nous permet de detecter facilement un problème de performance.
+Nous avons également ajouté les graphiques d'usages des ressources de la raspberry (RAM, espace dique, CPU). Cela nous permet de détecter facilement un problème de performance.
 
 
 ### 4 - L'Application Mobile
 
 ### Connection au server Raspberry
 
+Pour se connecter au server, l'utilisateur saisie l'adresse et le port. L'application va ensuite vérifier que ces informations sont valident en envoyent le message UDP "Hello". Si le serveur répond bien par "HelloBack" alors la connection est réussite.
 
 #### Affichage des données
 
+Une fois la connection effectuée, nous affichons les données du capteurs sur l'application et nous faisons des requêtes au serveur pour actualiser les données affichées.
+
 
 #### Ordre d'affichage des données
-Depuis l'application, l'utilisateur, peut choisir l'ordre dans lequel les données sont affichés. Les trois types de données sont affichés et l'utilisateur peut modifier l'ordre grâce à un simple glisser déposer. Cette modification est communiqué au serveur raspberry qui puis envoyer jusqu'au micro controller qui controler l'affichage OLED sur lequel les données seront affichés dans le nouvel ordre. 
+Depuis l'application, l'utilisateur peut choisir l'ordre dans lequel les données sont affichés. Les trois types de données sont affichés et l'utilisateur peut modifier l'ordre grâce à un simple glisser-déposer. Cette modification est communiquée au serveur raspberry puis envoyé jusqu'au micro controller qui controle l'affichage OLED sur lequel les données seront affichés dans le nouvel ordre. 
 
 ### Retour d'expérience
 
