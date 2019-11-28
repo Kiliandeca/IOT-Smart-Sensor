@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">Smart Sensor</string>
+    <string name="dashboard">Dashboard Monitor</string>
+    <string name="btn_connect">Connection</string>
+    <string name="co_feedback">Connection established</string>
+    <string name="ip_label">IP</string>
+    <string name="default_ip">192.168.43.190</string>
+    <string name="port_label">Port</string>
+    <string name="default_port">10000</string>
+    <string name="btn_save">Save order</string>
 </resources>

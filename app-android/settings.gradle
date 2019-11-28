@@ -1,2 +1,2 @@
-include ':app'
+include ':app', ':json-20190722'
 rootProject.name='Smart Sensor'
