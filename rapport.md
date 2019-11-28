@@ -26,13 +26,16 @@ Pour contrôler les communication, nous avons mis en place un protocole de commu
   * Adresse Destination : Identifiant du µ-contrôleur récepteur du paquet
   * Taille de la trame
   * Contrôle d'intégrité : on additionne les valeurs de chaque champs de la trame (sauf celui-ci) pour que la destination puisse vérifier l'intégrité de la trame
-  * Données variables
+  * Données variables : valeur des capteurs ou ordre d'affichage des données
 
 #### 1.2 Envoie des données
 
 Pour envoyer les données en radio fréquence, nous avons créer un programme en C. Nous utilisons la librairie fournie pour ce projet. Il nous suffit de placer les données dans un buffer, que nous passons à une fonction de cette librairie.
 
-Voici le code correspondant à l'envoi des donnnées :
+Voici le code correspondant à l'envoi des données :
+```c
+AJOUTER ICI
+```
 
 #### 1.3 Réception des données
 
@@ -45,25 +48,57 @@ Voici les étapes effectuées à la réception d'un message :
 * Sauvegarde des données dans des variables
 
 #### 1.4 Chiffrement
-
+Nous avons eus beaucoup de mal a implémenter un chiffrement correcte, après de nombreuses tentatives pour utiliser des algorithmes AES nous avons mis en place un algorithme de chiffrement Cesar.
+Ensuite après de nombreuses recherches en collaboration avec un autre groupe nous avons réussis à utiliser un chiffrement AES pour l'envoie des données.
+Données chiffrées :
+* Les valeurs des capteurs
+* L'ordre d'affichage "THL"
 
 ### 2 - Configuration des capteurs
 
 #### 2.1 Collecte des données
+Nous avons utilisé le code présent dans le Git "modules-techno-innov" pour réaliser la récupération des données du capteur.
+Les anciens TP réalisé nous ont également permis de réussir cette partie rapidement.
+Le capteur récupère les données suivantes :
+* Humidité
+* Lumière
+* Température
 
 #### 2.2 Affichage des données
+Nous avons utilisé le code présent dans le Git "modules-techno-innov" pour réaliser l'écrire des données sur l'écran LCD.
+Nous avons ajouté au code existant les fonctionnalités suivantes :
+* Fonction "shiftLeft" : permet de décaler une liste de char --> pour afficher un text déffilant sur l'écran
+* Fonction "gestionAffichage" : permet de spécifier l'ordre des éléments à afficher.
 
 #### 2.3 Communications avec la passerelle - format des données
+La communication avec la passerelle est en radio-fréquence.
+Le format des données envoyés :
+[Taille total paquet] [Adresse source] [Adresse destination] [CRC] [Données]
+* Le CRC est calculé avec les trois premiers champs (mis en place avant l'envoie des données, nous avons oublié de les ajoutées au CRC)
 
 #### 2.4 Communications avec la passerelle - envoyer données sur l'interface UART
+Le microcontrôleur branché au Raspberry Pi envoie les données reçu sur UART au format JSON.
+Données JSON :
+```json
+{ 
+	"Lux" : 200
+	"Temp" : 23,5
+	"Humidity" : 65,5
+}
+```
 
 ### 3 - Configuration du serveur 
 La Raspberry π nous sert de serveur applicatif, il enregistre les données et embarque notamment Grafana afin de générer des vues de ses donnés. Il communique aussi avec l'application Android pour lui envoyé des données et recevoir l'ordre d'affichage. 
 
+#### 3.1 Enregistrement des données
+Les données reçues depuis le microcontroller sont en format JSON, nous les enregistrons sur une base de données InfluxDB. C'est une BDD spécialement conçue pour stocker des données horodatés. 
 
-#### 3.1 InfluxDB & Grafana
+#### 3.2 InfluxDB & Grafana : Tableaux de bord
+Nous avons mis en place un dashboard Grafana pour permettre la visualisation des données reçues (température, humidité, liminausité) en fonction du temps. Notre instance Grafana se connecte directement à la base de données InfluxDB pour récupérer les données. Nous pouvons visualiser l'évolution de la température, de l'humidité et de la luminosité en choissisant l'échelle (5 minutes, 1 heure, 1 journée).
 
-#### 3.2 Message "HelloBack"
+Nous avons également ajouté les graphiques d'usages des ressources de la raspberry (RAM, espace dique, CPU). Cela nous permet de détecter facilement un problème de performance.
+
+#### 3.3 Message "HelloBack"
 Pour commencer à utiliser
 Pour se connecter à la Raspberry l'application envoi un message UDP "Hello", vous valider la connection la raspberry renvoi un message "HelloBack". 
 
@@ -71,43 +106,16 @@ Pour se connecter à la Raspberry l'application envoi un message UDP "Hello", vo
 ## II - Création de l'application Android
 
 ### 1 - Choix d'affichage
+Une fois la connexion effectuée, nous affichons les données du capteurs sur l'application et nous faisons des requêtes au serveur pour actualiser les données affichées.
+Depuis l'application, l'utilisateur peut choisir l'ordre dans lequel les données sont affichés. Les trois types de données sont affichés et l'utilisateur peut modifier l'ordre grâce à un simple glisser-déposer. Cette modification est communiquée au serveur raspberry puis envoyé jusqu'au micro controller qui controle l'affichage OLED sur lequel les données seront affichés dans le nouvel ordre. 
 
 ### 2 - Choix du serveur destination
+Pour se connecter au server, l'utilisateur saisie l'adresse et le port. L'application va ensuite vérifier que ces informations sont valident en envoyent le message UDP "Hello". Si le serveur répond bien par "HelloBack" alors la connection est réussite.
 
 ### 3 - Communication bidirectionnelle et filtrage des données reçus
 
 
 
+### III - Retour d'expérience
 
-### 3 - Le Raspberry π 
-
-La Raspberry π nous sert de serveur applicatif, il enregistre les données et embarque notamment Grafana afin de générer des vues de ses donnés. Il communique aussi avec l'application Android pour lui envoyé des données et recevoir l'ordre d'affichage. 
-
-
-
-##### Enregistrement des données
-Les données reçues depuis le microcontroller sont en format JSON, nous les enregistrons sur une base de données InfluxDB. C'est une BDD spécialement conçue pour stocker des données horodatés. 
-
-##### Tableau de bord Grafana
-Nous avons mis en place un dashboard Grafana pour permettre la visualisation des données reçues (température, humidité, liminausité) en fonction du temps. Notre instance Grafana se connecte directement à la base de données InfluxDB pour récupérer les données. Nous pouvons visualiser l'évolution de la température, de l'humidité et de la luminosité en choissisant l'échelle (5 minutes, 1 heure, 1 journée).
-
-Nous avons également ajouté les graphiques d'usages des ressources de la raspberry (RAM, espace dique, CPU). Cela nous permet de détecter facilement un problème de performance.
-
-
-### 4 - L'Application Mobile
-
-### Connection au server Raspberry
-
-Pour se connecter au server, l'utilisateur saisie l'adresse et le port. L'application va ensuite vérifier que ces informations sont valident en envoyent le message UDP "Hello". Si le serveur répond bien par "HelloBack" alors la connection est réussite.
-
-#### Affichage des données
-
-Une fois la connection effectuée, nous affichons les données du capteurs sur l'application et nous faisons des requêtes au serveur pour actualiser les données affichées.
-
-
-#### Ordre d'affichage des données
-Depuis l'application, l'utilisateur peut choisir l'ordre dans lequel les données sont affichés. Les trois types de données sont affichés et l'utilisateur peut modifier l'ordre grâce à un simple glisser-déposer. Cette modification est communiquée au serveur raspberry puis envoyé jusqu'au micro controller qui controle l'affichage OLED sur lequel les données seront affichés dans le nouvel ordre. 
-
-### Retour d'expérience
-
-### Conclusion
+### IV - Conclusion
