@@ -81,9 +81,9 @@ Le microcontrôleur branché au Raspberry Pi envoie les données reçu sur UART 
 Données JSON :
 ```json
 { 
-	"Lux" : 200
-	"Temp" : 23,5
-	"Humidity" : 65,5
+	"Lux" : "200",
+	"Temp" : "23,5",
+	"Humidity" : "65,5",
 }
 ```
 
@@ -105,15 +105,15 @@ Pour se connecter à la Raspberry l'application envoi un message UDP "Hello", vo
 
 ## II - Création de l'application Android
 
-### 1 - Choix d'affichage
+### 1 - Choix du serveur destination
+Pour se connecter au server, l'utilisateur saisie l'adresse et le port. L'application va ensuite vérifier que ces informations sont valident en envoyent le message UDP "Hello". Si le serveur répond bien par "HelloBack" alors la connection est réussite.
+
+### 2 - Choix d'affichage
 Une fois la connexion effectuée, nous affichons les données du capteurs sur l'application et nous faisons des requêtes au serveur pour actualiser les données affichées.
 Depuis l'application, l'utilisateur peut choisir l'ordre dans lequel les données sont affichés. Les trois types de données sont affichés et l'utilisateur peut modifier l'ordre grâce à un simple glisser-déposer. Cette modification est communiquée au serveur raspberry puis envoyé jusqu'au micro controller qui controle l'affichage OLED sur lequel les données seront affichés dans le nouvel ordre. 
 
-### 2 - Choix du serveur destination
-Pour se connecter au server, l'utilisateur saisie l'adresse et le port. L'application va ensuite vérifier que ces informations sont valident en envoyent le message UDP "Hello". Si le serveur répond bien par "HelloBack" alors la connection est réussite.
-
 ### 3 - Communication bidirectionnelle et filtrage des données reçus
-
+L'application envoi un message "getConfig" pour récupérer l'ordre d'affichage sauvegarder (TLH, HLT, ...). Ensuite un thread en arrière plan envoi réguliérement un message "getValues" pour récupérer les nouvelles données des capteurs. Pour enregistrer les modifications on envoi un message avec l'odre ex: "TLH".
 
 
 ### III - Retour d'expérience
