@@ -116,5 +116,8 @@ Pour se connecter au server, l'utilisateur saisie l'adresse et le port. L'applic
 
 
 ### III - Retour d'expérience
-
-### IV - Conclusion
+* Globalement nous avons aprécié la réalisation de ce projet. Il permettait de mettre en pratique l'ensemble des connaissances étudiées en cours / TP.
+* Nous avons eus beaucoup de mal pour ajouter de nouvelles librairie c au projet.
+* Nous avons investi beaucoup de temps personnel afin de réaliser le projet.
+* Nous aurions aimé avoir un peu plus de documentation sur les fonctions implémentées dans le microcontrôleur.
+* Nous pensions qu'un algorithme Cesar ne serait pas suffisant et nous l'avons donc supprimé pour ajouter l'agorithme de chiffrement, il aurait été intéressant de présenter les deux.
