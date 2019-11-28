@@ -4,7 +4,7 @@
 ## 0 - Introduction
 
 Ce mini-projet nous a été proposé dans le cadre du module **Architecture et protocoles réseaux pour IoT**. 
-L'objectif de ce mini-projet est de créer une petite infrastructure connecté :
+L'objectif de ce mini-projet est de créer une petite infrastructure connecté comprenant :
  * Un capteur d'humidité, de luminosité et de température sont branchés à un microcontrôleur, ces données sont affichées sur un écran LCD. 
  * Ce microcontrôleur envoie les données des capteurs par radio-fréquence à un second microcontrôleur appelé passerelle. La passerelle retransmet les données reçus au Raspberry Pi. 
  * Le Raspberry Pi retransmet également ces données (via un réseau Wifi) et un smartphone les reçoit et affiches les données à l'écran. 
@@ -20,7 +20,7 @@ L'objectif de ce mini-projet est de créer une petite infrastructure connecté :
 
 #### 1.1 Protocole de communication
 
-Pour contrôler les communication, nous avons mis en place un protocole de communication. Voici le format de trame que notre protocole prévoie d'utiliser :
+Pour contrôler les communications, nous avons mis en place un protocole de communication. Voici le format de trame que notre protocole prévoie d'utiliser :
 
   * Adresse Source : Identifiant du µ-contrôleur émetteur du paquet
   * Adresse Destination : Identifiant du µ-contrôleur récepteur du paquet
@@ -31,11 +31,6 @@ Pour contrôler les communication, nous avons mis en place un protocole de commu
 #### 1.2 Envoie des données
 
 Pour envoyer les données en radio fréquence, nous avons créer un programme en C. Nous utilisons la librairie fournie pour ce projet. Il nous suffit de placer les données dans un buffer, que nous passons à une fonction de cette librairie.
-
-Voici le code correspondant à l'envoi des données :
-```c
-AJOUTER ICI
-```
 
 #### 1.3 Réception des données
 
@@ -77,13 +72,17 @@ Le format des données envoyés :
 * Le CRC est calculé avec les trois premiers champs (mis en place avant l'envoie des données, nous avons oublié de les ajoutées au CRC)
 
 #### 2.4 Communications avec la passerelle - envoyer données sur l'interface UART
+Nous avons utilisé le code présent dans le Git "modules-techno-innov" pour réaliser la lecture des données sur l'interface UART0.
+Nous avons ajouté un bout de code permettant de signaler la fin de lecture sur l'UART dès que 3 caractères ont été reçus, ensuite nous récupérons des données dans le buffer puis nous réinitialisation les compteurs.
+
+#### 2.4 Communications avec la passerelle - lire données sur l'interface UART
 Le microcontrôleur branché au Raspberry Pi envoie les données reçu sur UART au format JSON.
 Données JSON :
 ```json
 { 
-	"Lux" : "200",
-	"Temp" : "23,5",
-	"Humidity" : "65,5",
+	"Lux" : 200
+	"Temp" : 23,5
+	"Humidity" : 65,5
 }
 ```
 
@@ -105,15 +104,15 @@ Pour se connecter à la Raspberry l'application envoi un message UDP "Hello", vo
 
 ## II - Création de l'application Android
 
-### 1 - Choix du serveur destination
-Pour se connecter au server, l'utilisateur saisie l'adresse et le port. L'application va ensuite vérifier que ces informations sont valident en envoyent le message UDP "Hello". Si le serveur répond bien par "HelloBack" alors la connection est réussite.
-
-### 2 - Choix d'affichage
+### 1 - Choix d'affichage
 Une fois la connexion effectuée, nous affichons les données du capteurs sur l'application et nous faisons des requêtes au serveur pour actualiser les données affichées.
 Depuis l'application, l'utilisateur peut choisir l'ordre dans lequel les données sont affichés. Les trois types de données sont affichés et l'utilisateur peut modifier l'ordre grâce à un simple glisser-déposer. Cette modification est communiquée au serveur raspberry puis envoyé jusqu'au micro controller qui controle l'affichage OLED sur lequel les données seront affichés dans le nouvel ordre. 
 
+### 2 - Choix du serveur destination
+Pour se connecter au server, l'utilisateur saisie l'adresse et le port. L'application va ensuite vérifier que ces informations sont valident en envoyent le message UDP "Hello". Si le serveur répond bien par "HelloBack" alors la connection est réussite.
+
 ### 3 - Communication bidirectionnelle et filtrage des données reçus
-L'application envoi un message "getConfig" pour récupérer l'ordre d'affichage sauvegarder (TLH, HLT, ...). Ensuite un thread en arrière plan envoi réguliérement un message "getValues" pour récupérer les nouvelles données des capteurs. Pour enregistrer les modifications on envoi un message avec l'odre ex: "TLH".
+
 
 
 ### III - Retour d'expérience
