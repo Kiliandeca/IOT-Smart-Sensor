@@ -55,62 +55,35 @@ Voici les étapes effectuées à la réception d'un message :
 
 #### 2.3 Communications avec la passerelle - format des données
 
-#### Communications avec la passerelle - envoyer données sur l'interface UART
+#### 2.4 Communications avec la passerelle - envoyer données sur l'interface UART
 
-### Configuration du serveur 
-
-#### InfluxDB & Grafana
-
-#### Hello back
+### 3 - Configuration du serveur 
+La Raspberry π nous sert de serveur applicatif, il enregistre les données et embarque notamment Grafana afin de générer des vues de ses donnés. Il communique aussi avec l'application Android pour lui envoyé des données et recevoir l'ordre d'affichage. 
 
 
+#### 3.1 InfluxDB & Grafana
 
-## 2 - Création de l'application Android
-
-### Choix d'affichage
-
-### Choix du serveur destination
-
-### Communication bidirectionnelle et filtrage des données reçus
+#### 3.2 Message "HelloBack"
+Pour commencer à utiliser
+Pour se connecter à la Raspberry l'application envoi un message UDP "Hello", vous valider la connection la raspberry renvoi un message "HelloBack". 
 
 
+## II - Création de l'application Android
 
+### 1 - Choix d'affichage
 
-### 1 - Le µ-Contrôleur avec ses capteurs
-**Rôle :** le rôle de ce microcontrôleur est de récupérer les données des capteurs, les afficher sur un écran (l'affichage varie en fonction des ordres envoyé par un smartphone) et d'envoyer ses données via radio-fréquence à un autre microcontrôleur.
-#### Fonctionnalités implémentées :
-* 
+### 2 - Choix du serveur destination
+
+### 3 - Communication bidirectionnelle et filtrage des données reçus
 
 
 
-#################################################################################################
-
-#################################################################################################
-
-#################################################################################################
-* Les 3 capteurs envoi leurs données au microcontrôleur via le bus I2C. 
-Ce microcontrôleur reçoit les données et les communique sur une liaison radio à un autre contrôleur identique.
-
-##### Réception du bus I2C
-
-##### Envoi sur liaison radio
-
-
-### 2 - Le µ-contrôleur passerelle
-
-C'est le deuxième µ-contrôleur qui sert de passerelle avec la raspberry π . Il traite les données reçues sur la liaison radio afin de les envoyer à la raspberry π et s'occupe de fonctionnalités comme le chiffrement.
-
-##### Chiffrement
-
-##### Réception sur la liaison radio
-
-##### Envoi à la Raspberry π
 
 ### 3 - Le Raspberry π 
 
-La Raspberry π nous sert de serveur applicatif, puisqu'il enregistre les données et embarque notamment Grafana afin de générer des vues de ses donnés. Il communique aussi avec l'application Android pour lui envoyé des données et recevoir des ordres. 
+La Raspberry π nous sert de serveur applicatif, il enregistre les données et embarque notamment Grafana afin de générer des vues de ses donnés. Il communique aussi avec l'application Android pour lui envoyé des données et recevoir l'ordre d'affichage. 
 
-Pour se connecter à la respberry l'application envoi un message UDP "Hello", vous valider la connection la raspberry renvoi un message "HelloBack". 
+
 
 ##### Enregistrement des données
 Les données reçues depuis le microcontroller sont en format JSON, nous les enregistrons sur une base de données InfluxDB. C'est une BDD spécialement conçue pour stocker des données horodatés. 
