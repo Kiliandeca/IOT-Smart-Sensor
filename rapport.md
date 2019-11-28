@@ -14,11 +14,11 @@ L'objectif de ce mini-projet est de créer une petite infrastructure connecté :
 
 ![alt text](https://image.noelshack.com/fichiers/2019/48/2/1574797645-untitled-diagram.png "Logo Title Text 1")
 
-## 1 - Mise en place d'une infrastructure objet-passerelle
+## I - Mise en place d'une infrastructure objet-passerelle
 
-### Mise en place du réseau
+### 1 - Mise en place du réseau
 
-#### Protocole de communication
+#### 1.1 Protocole de communication
 
 Pour contrôler les communication, nous avons mis en place un protocole de communication. Voici le format de trame que notre protocole prévoie d'utiliser :
 
@@ -26,35 +26,34 @@ Pour contrôler les communication, nous avons mis en place un protocole de commu
   * Adresse Destination : Identifiant du µ-contrôleur récepteur du paquet
   * Taille de la trame
   * Contrôle d'intégrité : on additionne les valeurs de chaque champs de la trame (sauf celui-ci) pour que la destination puisse vérifier l'intégrité de la trame
-  * Données
+  * Données variables
 
-#### Envoie des données
+#### 1.2 Envoie des données
 
-Pour envoyer les données sur le canal radio, nous avons créer un programme en C. Nous utilisons la librairie fournie pour ce projet. Il nous suffit de placer les données dans un buffer, que nous passons à une fonction de cette librairie.
+Pour envoyer les données en radio fréquence, nous avons créer un programme en C. Nous utilisons la librairie fournie pour ce projet. Il nous suffit de placer les données dans un buffer, que nous passons à une fonction de cette librairie.
 
 Voici le code correspondant à l'envoi des donnnées :
 
-#### Réception des données
+#### 1.3 Réception des données
 
-Tout comme l'envoi, la réception des données est gérée grâce à une fonction de la librairie, qui va extraire la trame vers un buffer. Lors de la réception, on vérifie que l'adresse source 
+Tout comme l'envoi, la réception des données est gérée grâce à une fonction de la librairie, qui va extraire le contenu de la trame vers un buffer.
+Voici les étapes effectuées à la réception d'un message :
+* Calcule du CRC : Taille du paquet + Adresse destination + Adresse source
+* Contrôle de l'adresse source / destination
+* Contrôle du CRC reçu avec le CRC calculé
+* Copie des données dans un buffer
+* Sauvegarde des données dans des variables
+
+#### 1.4 Chiffrement
 
 
-#### Chiffrement
-La mise en place du chiffrement des échanges entre les deux microcontrôleurs a été compliqué a mettre en place, nous avons effectués de nombreuses tentatives pour mettre en place un algorithme AES.
+### 2 - Configuration des capteurs
 
-Après de nombreuses tentatives (succédé par des échecs) pour chiffrer les données en utilisant des algorithmes AES trouvés en licence GPL. A la suite de ces echexs
+#### 2.1 Collecte des données
 
+#### 2.2 Affichage des données
 
-
-
-
-### Configuration des capteurs
-
-#### Collecte des données
-
-#### Affichage des données
-
-#### Communications avec la passerelle - format des données
+#### 2.3 Communications avec la passerelle - format des données
 
 #### Communications avec la passerelle - envoyer données sur l'interface UART
 
