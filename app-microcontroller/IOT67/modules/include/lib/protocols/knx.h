@@ -1,0 +1,2 @@
+#define KNX_MAX_FRAME_SIZE  263
+

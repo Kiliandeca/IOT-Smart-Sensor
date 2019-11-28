@@ -1,0 +1,22 @@
+# Basic control protocol for LightHouse over UDP.
+# Should be replaced by MQTT in the future
+
+# Set Led
+SL addr branche [ledx R G B] [ledy R G B] [....]
+# addr : 0 -> 16K (0 == broadcast)
+# branche : 0 - 64 (port * 32 + pin)
+# led : 0 -> 255
+# R, G et B : 0 -> 255
+
+# Get Leds info
+GI
+# Replies :
+GI addr branche nbleds
+
+# Get Leds Colors
+GLC addr branche
+# Reply :
+GLC addr branche [R G B] [R G B] ....
+
+
+

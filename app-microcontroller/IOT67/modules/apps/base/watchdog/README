@@ -1,0 +1,36 @@
+ADC and TMP36 Example
+
+Copyright 2013 Nathael Pajani <nathael.pajani@ed3l.fr>
+
+
+/* ****************************************************************************
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *************************************************************************** */
+
+This example shows the support of the internal ADC, with conversion examples for
+a TMP36 analog temperature sensor and a CdS photoresistor.
+
+The conversion results are sent on the UART0 serial line (115200 8n1) at
+regular intervals, and the status led flashes the rest of the time.
+
+The output looks like this :
+ ADC(0): 684 (raw: 0x02ac)
+ TMP36: 29,36 (orig: 248, raw: 00f8)
+
+The first line displays the decimal and hexadecimal value of the raw
+conversion result, on which was the luminosity sensor.
+The second line displays the TMP36 temperature, which is not very acurate at
+ambient temperature, with the corresponding decimal and hexadecimal raw
+conversion values.
