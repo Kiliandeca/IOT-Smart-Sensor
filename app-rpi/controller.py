@@ -93,33 +93,15 @@ def initUART():
                 print("Serial {} port not available".format(SERIALPORT))
                 exit()
 
-def get_date_object(date_string):
-  return iso8601.parse_date(date_string)
 
-def get_date_string(date_object):
-  return rfc3339.rfc3339(date_object)
 
+# Fonction permettant la connexion à la base de données InfluxDB
 def InitDatabaseConnexion(url,port,database):
         client = InfluxDBClient(host=url, port=port, ssl=False, verify_ssl=False)  
         client.switch_database(database)
-        # d = datetime.datetime.utcnow() + timedelta(seconds=50)  
-        # print d
-        # print d.isoformat("T") + "Z"
-        # time = str(d.isoformat("T") + "Z")
-        # jsonData = [{
-        #                 "measurement":"temperature",
-        #                 "time" : time,
-        #                 "fields":{
-        #                         "sensor1" : float(200)
-        #                 }
-
-        # }]
-        # client.write_points(jsonData)
-
-        # print(client.query('select * from temperature'))
-
         return client
 
+# Fonction permettant d'insérer les données aux format JSON dans la base de données InfluxDB
 def InsertDataInfluxDB(client,data):
         d = datetime.datetime.utcnow() + timedelta(seconds=1)  
         time = str(d.isoformat("T") + "Z")
@@ -150,27 +132,7 @@ def InsertDataInfluxDB(client,data):
 
         },
         ]
-        print("date : "+str(time))
-        client.write_points(jsonData)
-        ## DEBUG
-        # print(client.query('select * from temperature'))
-        # print(client.query('select * from humidity'))
-        # print(client.query('select * from luminosity'))
-
-# def ParseDataReceive(data):
-#         raw_data = data
-#         #raw_data = '{ "Lux":"030", "Temp":"23.2", "Humidity":"65.5"}'
-#         json_data = json.loads(raw_data)
-
-#         ### DEBUG
-#         # luxValue = int(json_data["Lux"])
-#         # tempValue = float(json_data["Temp"])
-#         # humidityValue = float(json_data["Humidity"])
-#         # print(luxValue)
-#         # print(tempValue)
-#         # print(humidityValue)
-
-#         return json_data
+	client.write_points(jsonData)
 
 
 def sendUARTMessage(msg):
@@ -184,11 +146,8 @@ if __name__ == '__main__':
         f= open(FILENAME,"w")
         print ('Press Ctrl-C to quit.')
 
+	# Connexion à la base de données InfluxDB
         client = InitDatabaseConnexion('localhost',8086,'iot')
-        # InsertDataInfluxDB(client,ParseDataReceive('{ "Lux":"030", "Temp":"23.2", "Humidity":"65.5"}'))
-
-
-        
 
         server = ThreadedUDPServer((HOST, UDP_PORT), ThreadedUDPRequestHandler)
 
@@ -204,19 +163,17 @@ if __name__ == '__main__':
                                 data_str = ser.read(ser.inWaiting()) 
                                 f.write(data_str)
                                 LAST_VALUE = data_str
-
+				
+				# Si la chaine reçu est bien au format JSON
+				# Alors on insert les données
                                 try:
                                         json_data = json.loads(data_str)
                                         InsertDataInfluxDB(client,json_data)
-                                        
+					
+                                # En cas d'erreur à la conversion en format JSON on affiche un message       
                                 except:
                                         print("La chaine recu n'est pas en format JSON")
 
-
-                                #test = ParseDataReceive(data_str)
-                                #print(test["Lux"])
-
-                                # InsertDataInfluxDB(client,ParseDataReceive(data_str))
                                 print(data_str)
 
 
