@@ -563,7 +563,8 @@ int main(void)
     cc_tx_buff[0] = 'T';
     cc_tx_buff[1] = 'H';
     cc_tx_buff[2] = 'L';
-
+	
+    // Lecture sur UART pour réception des données 
     while (1)
     {
         uint8_t status = 0;
@@ -579,7 +580,8 @@ int main(void)
             status_led(none);
             msleep(250);
         }
-
+	
+	// On s'attend à recevoie une chaîne de trois caractères (e.g. "THL"), dès qu'on a 3 caractères, on envoi "\n" à la fonction handle_uart_cmd, ce qui va arreter la lecture sur l'UART 
         if (cc_ptr == 3)
         {
        
